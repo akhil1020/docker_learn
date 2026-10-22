@@ -1,0 +1,30 @@
+
+services:
+  app:
+    build: .
+    container_name: app_api
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://appuser:devpassword123@db:5432/fastapi_db
+
+  db:
+    image: postgres:18
+    container_name: app_db
+    environment:
+      POSTGRES_USER: appuser
+      POSTGRES_PASSWORD: devpassword123
+      POSTGRES_DB: fastapi_db
+    volumes:
+      - postgres_data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U appuser -d fastapi_db"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+volumes:
+  postgres_data:
